@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Settings &middot; Review Sentiment{% endblock %}
+{% block content %}
+
+    <header class="page-head">
+      <div>
+        <h1>Settings</h1>
+        <p class="subtitle">Model status, and a way to retrain it without the command line.</p>
+      </div>
+      <div class="server-chip">
+        <span class="status-dot" id="server-dot"></span>
+        <div>
+          <div class="server-chip-title" id="server-chip-title">Ready</div>
+          <div class="server-chip-sub mono">local &middot; Flask</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel" style="margin-bottom:20px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Model status</div>
+          <div class="panel-note">What's currently loaded and serving predictions</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="info-grid" id="info-grid">
+          <div class="info-cell"><div class="info-cell-label">Status</div><div class="info-cell-value" id="info-status">&mdash;</div></div>
+          <div class="info-cell"><div class="info-cell-label">Trained</div><div class="info-cell-value" id="info-trained">&mdash;</div></div>
+          <div class="info-cell"><div class="info-cell-label">Accuracy</div><div class="info-cell-value" id="info-accuracy">&mdash;</div></div>
+          <div class="info-cell"><div class="info-cell-label">Training rows</div><div class="info-cell-value" id="info-rows">&mdash;</div></div>
+          <div class="info-cell"><div class="info-cell-label">Data source</div><div class="info-cell-value" id="info-source">&mdash;</div></div>
+          <div class="info-cell"><div class="info-cell-label">File size</div><div class="info-cell-value" id="info-size">&mdash;</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-bottom:20px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Retrain the model</div>
+          <div class="panel-note">Runs the same TF-IDF + Logistic Regression pipeline as <code class="mono">python -m src.train</code></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="radio-row">
+          <label class="radio-option"><input type="radio" name="train-source" value="sample" checked> Use bundled sample data</label>
+          <label class="radio-option"><input type="radio" name="train-source" value="upload"> Upload labeled CSV (needs <code class="mono">review</code> + <code class="mono">sentiment</code> columns)</label>
+        </div>
+        <div class="field" id="train-upload-field" style="display:none; margin-bottom:14px;">
+          <label class="upload-drop" id="train-drop" for="train-file" style="width:280px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+            <span id="train-drop-text">Choose CSV&hellip;</span>
+          </label>
+          <input type="file" id="train-file" accept=".csv" style="display:none;">
+        </div>
+        <button class="btn btn-primary" id="retrain-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+          Retrain Model
+        </button>
+        <div class="panel-note" id="retrain-note" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">About</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p class="about-text">
+          Customer Review Sentiment classifies product reviews as positive, neutral, or negative using
+          TF-IDF text features and a Logistic Regression classifier (see <code class="mono">src/train.py</code>).
+          This Flask dashboard is one of three ways to use it &mdash; the others are a Streamlit dashboard
+          (<code class="mono">dashboard/app.py</code>) and a REST API (<code class="mono">app/main.py</code>, FastAPI).
+          Everything runs locally; nothing leaves this machine.
+        </p>
+      </div>
+    </section>
+
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='settings.js') }}"></script>
+{% endblock %}

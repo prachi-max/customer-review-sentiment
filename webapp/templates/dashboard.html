@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Dashboard &middot; Review Sentiment{% endblock %}
+{% block content %}
+
+    <header class="hero">
+      <div class="hero-top">
+        <span class="eyebrow">Dashboard</span>
+        <div class="server-chip">
+          <span class="status-dot" id="server-dot"></span>
+          <div>
+            <div class="server-chip-title" id="server-chip-title">Ready</div>
+            <div class="server-chip-sub mono">local &middot; Flask</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-main">
+        <div class="hero-text">
+          <h1>Understand your customers <span class="accent">better</span></h1>
+          <p class="subtitle">Upload a CSV of reviews and classify them as positive, neutral, or negative &mdash; see the breakdown, the most common complaints, and try a live prediction, all running locally.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg width="196" height="164" viewBox="0 0 196 164" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="10" width="188" height="148" rx="24" fill="#efe9ff"/>
+            <rect x="26" y="94" width="18" height="42" rx="6" fill="#c9bbff"/>
+            <rect x="52" y="76" width="18" height="60" rx="6" fill="#b8860b" opacity="0.55"/>
+            <rect x="78" y="58" width="18" height="78" rx="6" fill="#1a9e6a" opacity="0.85"/>
+            <g>
+              <rect x="104" y="26" width="76" height="56" rx="16" fill="url(#g1)"/>
+              <path d="M120 82 L120 96 L136 82 Z" fill="url(#g1)"/>
+              <circle cx="126" cy="52" r="4" fill="#fff"/>
+              <circle cx="142" cy="52" r="4" fill="#fff"/>
+              <circle cx="158" cy="52" r="4" fill="#fff"/>
+            </g>
+            <g>
+              <circle cx="44" cy="40" r="15" fill="#fff"/>
+              <path d="M37 40l5 5 9-10" stroke="#1a9e6a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </g>
+            <defs>
+              <linearGradient id="g1" x1="104" y1="26" x2="180" y2="96" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a48bff"/>
+                <stop offset="1" stop-color="#6d4fef"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <section class="filter-bar">
+      <div class="field">
+        <label>Reviews file</label>
+        <label class="upload-drop" id="upload-drop" for="file-input">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+          <span id="upload-drop-text">Choose CSV&hellip; (or use sample data)</span>
+        </label>
+        <input type="file" id="file-input" accept=".csv">
+      </div>
+      <button class="btn btn-primary" id="analyze-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+        Analyze
+      </button>
+      <button class="btn btn-ghost" id="clear-btn">Clear file</button>
+      <button class="btn" id="save-history-btn" disabled title="Analyze reviews first">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+        Save to History
+      </button>
+      <div class="panel-note" id="filter-note" style="align-self:center;">Needs a <code class="mono">review</code> column. <code class="mono">product</code> is optional.</div>
+    </section>
+
+    <section class="stat-row" id="stat-row" style="display:none;">
+      <div class="stat-card stat-positive">
+        <div class="stat-card-top">
+          <div class="stat-card-label"><span class="dot"></span>Positive</div>
+        </div>
+        <div class="stat-card-value" id="stat-positive">&mdash;</div>
+        <div class="stat-card-sub"><span id="stat-positive-pct">&mdash;</span> of all reviews</div>
+        <div class="stat-spark"><canvas id="spark-positive"></canvas></div>
+      </div>
+      <div class="stat-card stat-neutral">
+        <div class="stat-card-top">
+          <div class="stat-card-label"><span class="dot"></span>Neutral</div>
+        </div>
+        <div class="stat-card-value" id="stat-neutral">&mdash;</div>
+        <div class="stat-card-sub"><span id="stat-neutral-pct">&mdash;</span> of all reviews</div>
+        <div class="stat-spark"><canvas id="spark-neutral"></canvas></div>
+      </div>
+      <div class="stat-card stat-negative">
+        <div class="stat-card-top">
+          <div class="stat-card-label"><span class="dot"></span>Negative</div>
+        </div>
+        <div class="stat-card-value" id="stat-negative">&mdash;</div>
+        <div class="stat-card-sub"><span id="stat-negative-pct">&mdash;</span> of all reviews</div>
+        <div class="stat-spark"><canvas id="spark-negative"></canvas></div>
+      </div>
+    </section>
+
+    <div class="panel-note" id="issues-note" style="padding: 0 4px 14px; display: none; color: var(--negative);"></div>
+
+    <section class="panel-grid" id="chart-grid" style="display:none;">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Sentiment overview</div>
+            <div class="panel-note">Share of positive, neutral, and negative reviews</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="donut-layout">
+            <div class="donut-chart-wrap">
+              <canvas id="sentiment-chart"></canvas>
+              <div class="donut-center">
+                <div class="donut-center-value" id="donut-total">&mdash;</div>
+                <div class="donut-center-label">Total Reviews</div>
+              </div>
+            </div>
+            <div class="donut-legend" id="sentiment-legend"></div>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Most common negative topics</div>
+            <div class="panel-note">Top words/phrases in negative reviews</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="topic-list" id="topic-list"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel" id="trend-panel" style="display:none; margin-bottom:20px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Sentiment across the file</div>
+          <div class="panel-note">Reviews bucketed in the order they were uploaded &mdash; how the mix shifts from the top of the file to the bottom</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:230px;"><canvas id="trend-chart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="panel" id="product-panel" style="display:none; margin-bottom:20px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Product-wise sentiment</div>
+          <div class="panel-note">Share of each sentiment, by product</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:260px;"><canvas id="product-chart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="panel-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:20px;">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Try a live prediction</div>
+            <div class="panel-note">Type a review and classify it instantly</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="predict-box">
+            <input type="text" id="predict-input" placeholder="The delivery was fast and the build quality feels premium.">
+            <button class="btn btn-primary" id="predict-btn">Predict</button>
+          </div>
+          <div class="predict-result" id="predict-result">
+            <span class="badge" id="predict-badge">&mdash;</span>
+            <span class="confidence-track"><span class="confidence-fill" id="predict-confidence-fill" style="width:0%;"></span></span>
+            <span class="mono" id="predict-confidence-text" style="font-size:12px; color: var(--text-faint);"></span>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Recent reviews</div>
+            <div class="panel-note" id="recent-note">From your most recently saved analysis</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="recent-list" id="recent-list">
+            <div class="empty-note">Loading&hellip;</div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel" id="results-panel" style="display:none;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Review-level results</div>
+          <div class="panel-note" id="results-note">Every row, with predicted sentiment and confidence</div>
+        </div>
+        <div class="panel-actions">
+          <input type="text" id="results-search" class="search-input" placeholder="Search reviews&hellip;" autocomplete="off">
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead id="results-head"></thead>
+            <tbody id="results-body">
+              <tr><td class="empty-note">Upload a CSV or click Analyze to use the sample data.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}

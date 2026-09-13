@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+models/*.joblib
+models/metrics.json
+webapp/history.db
+*.egg-info/

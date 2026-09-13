@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}History &middot; Review Sentiment{% endblock %}
+{% block content %}
+
+    <header class="page-head">
+      <div>
+        <h1>History</h1>
+        <p class="subtitle">Every analysis you saved from the Dashboard, newest first. Click a row to see the full breakdown again.</p>
+      </div>
+      <div class="server-chip">
+        <span class="status-dot" id="server-dot"></span>
+        <div>
+          <div class="server-chip-title" id="server-chip-title">Ready</div>
+          <div class="server-chip-sub mono">local &middot; Flask</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Saved analyses</div>
+          <div class="panel-note" id="history-note">&nbsp;</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Source</th>
+                <th>Total</th>
+                <th>Split</th>
+                <th>Positive</th>
+                <th>Neutral</th>
+                <th>Negative</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="history-body">
+              <tr><td class="empty-note" colspan="8">Loading&hellip;</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+{% endblock %}

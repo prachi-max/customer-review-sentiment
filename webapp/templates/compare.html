@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Compare &middot; Review Sentiment{% endblock %}
+{% block content %}
+
+    <header class="page-head">
+      <div>
+        <h1>Compare</h1>
+        <p class="subtitle">Upload two review files &mdash; e.g. this month vs. last month &mdash; and see how sentiment shifted between them.</p>
+      </div>
+      <div class="server-chip">
+        <span class="status-dot" id="server-dot"></span>
+        <div>
+          <div class="server-chip-title" id="server-chip-title">Ready</div>
+          <div class="server-chip-sub mono">local &middot; Flask</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel" style="margin-bottom:20px;">
+      <div class="panel-body" style="padding-top:18px;">
+        <div class="compare-upload-grid">
+          <div>
+            <span class="compare-slot-label">File A</span>
+            <label class="upload-drop" id="drop-a" for="file-a" style="width:100%;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+              <span id="drop-a-text">Choose CSV&hellip; (or leave empty to use sample data)</span>
+            </label>
+            <input type="file" id="file-a" accept=".csv" style="display:none;">
+          </div>
+          <div class="vs-label">vs</div>
+          <div>
+            <span class="compare-slot-label">File B</span>
+            <label class="upload-drop" id="drop-b" for="file-b" style="width:100%;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+              <span id="drop-b-text">Choose CSV&hellip; (or leave empty to use sample data)</span>
+            </label>
+            <input type="file" id="file-b" accept=".csv" style="display:none;">
+          </div>
+        </div>
+        <div style="margin-top:14px; display:flex; align-items:center; gap:12px;">
+          <button class="btn btn-primary" id="compare-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="M16 21l4-4-4-4"/><path d="M20 17H4"/></svg>
+            Compare
+          </button>
+          <div class="panel-note" id="issues-note" style="display:none; color: var(--negative);"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="compare-results" style="display:none;">
+      <section class="stat-row">
+        <div class="stat-card stat-positive">
+          <div class="stat-card-label">Positive</div>
+          <div class="compare-stat-pair" style="margin-top:6px;">
+            <div class="stat-card-value" id="pos-a" style="font-size:22px;">&mdash;</div>
+            <span class="delta-pill" id="pos-delta">&mdash;</span>
+            <div class="stat-card-value" id="pos-b" style="font-size:22px;">&mdash;</div>
+          </div>
+        </div>
+        <div class="stat-card stat-neutral">
+          <div class="stat-card-label">Neutral</div>
+          <div class="compare-stat-pair" style="margin-top:6px;">
+            <div class="stat-card-value" id="neu-a" style="font-size:22px;">&mdash;</div>
+            <span class="delta-pill" id="neu-delta">&mdash;</span>
+            <div class="stat-card-value" id="neu-b" style="font-size:22px;">&mdash;</div>
+          </div>
+        </div>
+        <div class="stat-card stat-negative">
+          <div class="stat-card-label">Negative</div>
+          <div class="compare-stat-pair" style="margin-top:6px;">
+            <div class="stat-card-value" id="neg-a" style="font-size:22px;">&mdash;</div>
+            <span class="delta-pill" id="neg-delta">&mdash;</span>
+            <div class="stat-card-value" id="neg-b" style="font-size:22px;">&mdash;</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Sentiment share, side by side</div>
+            <div class="panel-note" id="compare-chart-note">A vs. B</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:280px;"><canvas id="compare-chart"></canvas></div>
+        </div>
+      </section>
+    </section>
+
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='compare.js') }}"></script>
+{% endblock %}

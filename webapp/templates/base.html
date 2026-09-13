@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Review Sentiment{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <a class="sidebar-brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-mark">{{ icon('message-square', 17) }}</span>
+      <span class="brand-word">Review<br>Sentiment</span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item {{ 'active' if active_page == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}"><span class="nav-icon">{{ icon('grid', 15) }}</span>Dashboard</a>
+      <a class="nav-item {{ 'active' if active_page == 'history' else '' }}" href="{{ url_for('history_page') }}"><span class="nav-icon">{{ icon('archive', 15) }}</span>History</a>
+      <a class="nav-item {{ 'active' if active_page == 'insights' else '' }}" href="{{ url_for('insights_page') }}"><span class="nav-icon">{{ icon('cloud', 15) }}</span>Insights</a>
+      <a class="nav-item {{ 'active' if active_page == 'compare' else '' }}" href="{{ url_for('compare_page') }}"><span class="nav-icon">{{ icon('compare', 15) }}</span>Compare</a>
+      <a class="nav-item {{ 'active' if active_page == 'settings' else '' }}" href="{{ url_for('settings_page') }}"><span class="nav-icon">{{ icon('sliders', 15) }}</span>Settings</a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-footer">
+      <a class="help-card" href="{{ url_for('settings_page') }}">
+        <span class="help-card-icon">{{ icon('sliders', 16) }}</span>
+        <span class="help-card-title">Model &amp; settings</span>
+        <span class="help-card-sub">Check status, retrain</span>
+      </a>
+      <div class="model-card">
+        <div class="model-card-row">
+          <span class="mono model-card-name" id="model-name">TF-IDF + LogReg</span>
+          <span class="status-dot" id="model-dot"></span>
+        </div>
+        <div class="model-card-status" id="model-text">Checking model&hellip;</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content">
+    {% block content %}{% endblock %}
+    <footer>Runs entirely on your machine &middot; nothing is sent anywhere except this local server</footer>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script src="{{ url_for('static', filename='common.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
